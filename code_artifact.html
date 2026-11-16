@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>大きな足跡 スペシャル背景 ダイマックス所持チェッカー</title>
+    <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+    <link rel="preconnect" href="https://assets.pokemon.com" crossorigin>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-cream: #f8f1e5;
+            --header-bg: rgba(248, 241, 229, 0.96);
+            --navy-dark: #111c35;
+            --navy-card: #0b1324;
+            --yellow-label: #f4d03f;
+            --emerald: #10b981;
+            --emerald-dark: #059669;
+            --purple-btn: #6d28d9;
+            --border-subtle: rgba(17, 28, 53, 0.14);
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            background-color: var(--bg-cream);
+            color: var(--navy-dark);
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            line-height: 1.35;
+            overflow-x: hidden;
+        }
+
+        button, input, textarea {
+            font-family: inherit;
+            font-size: inherit;
+            border: none;
+            outline: none;
+            background: none;
+        }
+
+        button {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* ==========================================
+           超コンパクト固定ヘッダー
+           ========================================== */
+        .app-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--header-bg);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border-subtle);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        }
+
+        .header-inner {
+            max-width: 880px;
+            margin: 0 auto;
+            padding: 5px 8px 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .header-row-1 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4px;
+            min-height: 26px;
+            flex-wrap: nowrap;
+        }
+
+        .title-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .app-title {
+            font-size: 12.5px;
+            font-weight: 900;
+            color: var(--navy-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            letter-spacing: -0.03em;
+        }
+
+        .progress-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            background-color: var(--navy-dark);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 999px;
+            flex-shrink: 0;
+        }
+
+        .progress-badge .owned-num { color: #34d399; }
+        .progress-badge .slash { color: #94a3b8; margin: 0 1px; }
+        .progress-badge .pct { color: #fcd34d; font-size: 10px; margin-left: 2px; }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .segmented-group {
+            display: inline-flex;
+            align-items: center;
+            background-color: #e2dcd0;
+            padding: 2px;
+            border-radius: 7px;
+            flex-shrink: 0;
+        }
+
+        .seg-btn {
+            font-size: 11px;
+            font-weight: 800;
+            color: #475569;
+            padding: 2px 6px;
+            border-radius: 5px;
+            transition: all 0.15s ease;
+            line-height: 1.3;
+            white-space: nowrap;
+        }
+
+        .seg-btn.active-dark {
+            background-color: var(--navy-dark);
+            color: #ffffff;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .seg-btn.active-light {
+            background-color: #ffffff;
+            color: var(--navy-dark);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            height: 24px;
+            padding: 0 7px;
+            border-radius: 6px;
+            font-size: 10.5px;
+            font-weight: 800;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .action-btn:active { transform: scale(0.95); }
+        .btn-export { background-color: var(--purple-btn); color: #ffffff; }
+        .btn-manage { background-color: #e2dcd0; color: #334155; padding: 0 6px; }
+        .btn-photo { background-color: #0284c7; color: #ffffff; }
+        .btn-photo.has-photos { background-color: var(--emerald-dark); }
+
+        .header-row-2 {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-height: 24px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 110px;
+            flex-shrink: 0;
+        }
+
+        .search-input {
+            width: 100%;
+            height: 23px;
+            padding: 0 18px 0 20px;
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--navy-dark);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            color: #64748b;
+            pointer-events: none;
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 3px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: #cbd5e1;
+            color: #334155;
+            font-size: 10px;
+            font-weight: 900;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-clear.visible { display: inline-flex; }
+
+        .region-nav {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            overflow-x: auto;
+            flex: 1;
+            padding: 1px 0;
+        }
+
+        .region-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: 900;
+            background-color: var(--yellow-label);
+            color: var(--navy-dark);
+            border: 1px solid rgba(180, 130, 0, 0.35);
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .region-chip.complete {
+            background-color: #d1fae5;
+            color: #065f46;
+            border-color: #6ee7b7;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 3px;
+            background-color: #e2dcd0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #7c3aed 0%, #db2777 50%, #10b981 100%);
+            transition: width 0.2s ease;
+        }
+
+        /* ==========================================
+           メイン領域 & 5列ポケモンカードグリッド
+           ========================================== */
+        .main-container {
+            max-width: 880px;
+            margin: 0 auto;
+            padding: 8px 8px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .region-section {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .region-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .region-title-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--yellow-label);
+            color: #111827;
+            padding: 2px 9px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 900;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+        }
+
+        .region-subcount {
+            font-size: 11px;
+            background-color: rgba(0, 0, 0, 0.12);
+            padding: 0 5px;
+            border-radius: 4px;
+        }
+
+        .region-toggle-btn {
+            font-size: 10.5px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 5px;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            background-color: #ecfdf5;
+            color: #065f46;
+        }
+
+        .region-toggle-btn.is-complete {
+            border-color: #cbd5e1;
+            background-color: #ffffff;
+            color: #475569;
+        }
+
+        /* 5列グリッド */
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 5px;
+        }
+
+        /* ポケモンカード */
+        .poke-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--navy-card);
+            border: 2px solid #1e293b;
+            border-radius: 7px;
+            overflow: hidden;
+            transition: transform 0.1s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .poke-card:active {
+            transform: scale(0.95);
+        }
+
+        /* スペシャル背景（ダイマックス紫渦巻きグラデーション） */
+        .dmax-art-box {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            background:
+                radial-gradient(circle at 50% 78%, rgba(236, 72, 153, 0.6) 0%, rgba(126, 34, 206, 0.68) 38%, rgba(46, 16, 101, 0.95) 72%, #0f0720 100%);
+            overflow: hidden;
+        }
+
+        .dmax-art-box::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 50% 18%, rgba(244, 63, 94, 0.35) 0%, transparent 60%),
+                repeating-radial-gradient(circle at 50% 55%, rgba(255, 255, 255, 0.04) 0px, rgba(255, 255, 255, 0.04) 3px, transparent 3px, transparent 9px);
+            pointer-events: none;
+        }
+
+        /* ポケモンイラスト画像 */
+        .poke-img {
+            position: relative;
+            z-index: 2;
+            width: 92%;
+            height: 92%;
+            object-fit: contain;
+            image-rendering: pixelated;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.75));
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .poke-img.smooth-art {
+            image-rendering: auto;
+        }
+
+        .poke-img.cropped-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            image-rendering: auto;
+            filter: none;
+        }
+
+        .dmax-art-box.has-cropped-photo {
+            padding: 0;
+        }
+
+        /* 背面フォールバック（通信制限時でも図鑑番号とモンスターボールアイコンを常時表示） */
+        .fallback-badge {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2px;
+            color: rgba(255, 255, 255, 0.35);
+            pointer-events: none;
+        }
+
+        .fallback-dex {
+            font-size: 9px;
+            font-weight: 800;
+            color: rgba(244, 208, 63, 0.65);
+        }
+
+        /* 下部の黒帯ポケモン名ラベル */
+        .poke-name-bar {
+            background-color: #091224;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 10px;
+            line-height: 1.2;
+            padding: 4px 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .poke-name-bar.long-name {
+            font-size: 8.2px;
+            letter-spacing: -0.04em;
+        }
+
+        /* 右上のチェックバッジ */
+        .check-indicator {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            z-index: 5;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: rgba(15, 23, 42, 0.55);
+            border: 1.5px solid rgba(255, 255, 255, 0.45);
+            color: transparent;
+            font-size: 11px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .get-ribbon {
+            display: none;
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            background-color: rgba(5, 150, 105, 0.95);
+            color: #ffffff;
+            font-size: 8.5px;
+            font-weight: 900;
+            padding: 1px 5px;
+            border-radius: 999px;
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+
+        /* 所持済み（チェックON）時 */
+        .poke-card.owned {
+            border-color: var(--emerald);
+            box-shadow: 0 0 0 1px var(--emerald), 0 3px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .poke-card.owned .dmax-art-box::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(16, 185, 129, 0.18);
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .poke-card.owned .check-indicator {
+            background-color: var(--emerald);
+            border-color: #ffffff;
+            color: #ffffff;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+        }
+
+        .poke-card.owned .get-ribbon {
+            display: inline-block;
+        }
+
+        .poke-card.owned .poke-name-bar {
+            background-color: #064e3b;
+            color: #ecfdf5;
+        }
+
+        .empty-state {
+            display: none;
+            text-align: center;
+            padding: 32px 16px;
+            background-color: rgba(255, 255, 255, 0.65);
+            border: 1px dashed #cbd5e1;
+            border-radius: 12px;
+            margin: 12px 0;
+        }
+
+        .empty-state.visible { display: block; }
+
+        .app-footer {
+            max-width: 880px;
+            margin: 0 auto;
+            padding: 8px 12px 28px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: #475569;
+            line-height: 1.5;
+        }
+
+        /* モーダル */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background-color: rgba(15, 23, 42, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-backdrop.open { display: flex; }
+
+        .modal-panel {
+            width: 100%;
+            max-width: 440px;
+            background-color: #ffffff;
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title { font-size: 15px; font-weight: 900; color: var(--navy-dark); }
+        .modal-close {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 900;
+            font-size: 14px;
+        }
+
+        .summary-textarea {
+            width: 100%;
+            height: 170px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background-color: #f8fafc;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #1e293b;
+            resize: none;
+        }
+
+        .modal-btn-row { display: flex; gap: 8px; }
+        .modal-btn {
+            flex: 1;
+            padding: 9px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .modal-btn-primary { background-color: var(--purple-btn); color: #ffffff; }
+        .modal-btn-emerald { background-color: var(--emerald-dark); color: #ffffff; }
+        .modal-btn-danger { background-color: #e11d48; color: #ffffff; }
+        .modal-btn-secondary { background-color: #e2e8f0; color: #334155; }
+
+        .toast {
+            position: fixed;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background-color: rgba(17, 28, 53, 0.95);
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 8px 16px;
+            border-radius: 999px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 300;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (min-width: 640px) {
+            .app-title { font-size: 15px; }
+            .search-box { width: 150px; }
+            .pokemon-grid { gap: 8px; }
+            .poke-name-bar { font-size: 12px; padding: 5px 4px; }
+            .poke-name-bar.long-name { font-size: 10.5px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 超コンパクト2段ヘッダー -->
+    <header class="app-header">
+        <div class="header-inner">
+            <div class="header-row-1">
+                <div class="title-group">
+                    <h1 class="app-title">大きな足跡 背景</h1>
+                    <div class="progress-badge">
+                        <span id="owned-count" class="owned-num">0</span>
+                        <span class="slash">/</span>
+                        <span id="total-count">58</span>
+                        <span id="progress-percent" class="pct">(0%)</span>
+                    </div>
+                </div>
+
+                <div class="header-actions">
+                    <div class="segmented-group">
+                        <button type="button" id="page-btn-all" class="seg-btn active-dark" onclick="setPageFilter('all')">全</button>
+                        <button type="button" id="page-btn-1" class="seg-btn" onclick="setPageFilter('1')">1/2</button>
+                        <button type="button" id="page-btn-2" class="seg-btn" onclick="setPageFilter('2')">2/2</button>
+                    </div>
+
+                    <button type="button" id="header-mode-btn" class="action-btn btn-manage" onclick="cycleImageMode()">
+                        <span id="header-mode-label">⚡高速絵</span>
+                    </button>
+
+                    <button type="button" id="header-photo-btn" class="action-btn btn-photo" onclick="triggerPhotoUpload()">
+                        <span id="header-photo-label">📷スクショ取込</span>
+                    </button>
+
+                    <button type="button" class="action-btn btn-export" onclick="openSummaryModal()">
+                        <span>📋出力</span>
+                    </button>
+
+                    <button type="button" class="action-btn btn-manage" onclick="openManageModal()">
+                        <span>⚙️</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="header-row-2">
+                <div class="segmented-group">
+                    <button type="button" id="status-btn-all" class="seg-btn active-light" onclick="setStatusFilter('all')">全て</button>
+                    <button type="button" id="status-btn-missing" class="seg-btn" onclick="setStatusFilter('missing')">未所持</button>
+                    <button type="button" id="status-btn-owned" class="seg-btn" onclick="setStatusFilter('owned')">所持済</button>
+                </div>
+
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="search-input" class="search-input" placeholder="名前検索..." oninput="handleSearch(this.value)">
+                    <button type="button" id="clear-search-btn" class="search-clear" onclick="clearSearch()">×</button>
+                </div>
+
+                <nav id="region-nav" class="region-nav no-scrollbar">
+                    <button type="button" id="nav-chip-kanto" class="region-chip" onclick="scrollToRegion('kanto')"><span>カントー</span><span class="chip-count">0/20</span></button>
+                    <button type="button" id="nav-chip-johto" class="region-chip" onclick="scrollToRegion('johto')"><span>ジョウト</span><span class="chip-count">0/4</span></button>
+                    <button type="button" id="nav-chip-hoenn" class="region-chip" onclick="scrollToRegion('hoenn')"><span>ホウエン</span><span class="chip-count">0/7</span></button>
+                    <button type="button" id="nav-chip-sinnoh" class="region-chip" onclick="scrollToRegion('sinnoh')"><span>シンオウ</span><span class="chip-count">0/1</span></button>
+                    <button type="button" id="nav-chip-unova" class="region-chip" onclick="scrollToRegion('unova')"><span>イッシュ</span><span class="chip-count">0/10</span></button>
+                    <button type="button" id="nav-chip-kalos" class="region-chip" onclick="scrollToRegion('kalos')"><span>カロス</span><span class="chip-count">0/1</span></button>
+                    <button type="button" id="nav-chip-alola" class="region-chip" onclick="scrollToRegion('alola')"><span>アローラ</span><span class="chip-count">0/3</span></button>
+                    <button type="button" id="nav-chip-galar" class="region-chip" onclick="scrollToRegion('galar')"><span>ガラル</span><span class="chip-count">0/12</span></button>
+                </nav>
+            </div>
+        </div>
+
+        <div class="progress-track">
+            <div id="progress-bar" class="progress-fill"></div>
+        </div>
+    </header>
+
+    <!-- スクショ2枚取り込み用ファイル選択 -->
+    <input type="file" id="photo-file-input" accept="image/*" multiple style="display:none" onchange="handlePhotoFilesSelected(this.files)">
+
+    <!-- ==========================================
+         メイン一覧（最初からHTMLに全58枠を直接配置し確実・即座に表示）
+         ========================================== -->
+    <main class="main-container">
+        <div id="regions-container" style="display: flex; flex-direction: column; gap: 12px;">
+
+            <!-- 1. カントー (20) -->
+            <section id="section-kanto" class="region-section" data-page="1" data-region="kanto">
+                <div class="region-header">
+                    <div class="region-title-pill">
+                        <span>カントー (20)</span>
+                        <span id="region-subcount-kanto" class="region-subcount">0/20</span>
+                    </div>
+                    <button type="button" id="region-toggle-kanto" class="region-toggle-btn" onclick="toggleRegionAll('kanto')">地方一括チェック</button>
+                </div>
+                <div class="pokemon-grid">
+                    <div id="card-kanto_1" class="poke-card" data-key="kanto_1" data-name="フシギダネ" data-id="1" data-dex="001" data-page="1" data-row="0" data-col="0" onclick="togglePokemon('kanto_1')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.1</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png" onerror="handleImgErr(this,'001')" alt="フシギダネ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">フシギダネ</div>
+                    </div>
+                    <div id="card-kanto_4" class="poke-card" data-key="kanto_4" data-name="ヒトカゲ" data-id="4" data-dex="004" data-page="1" data-row="0" data-col="1" onclick="togglePokemon('kanto_4')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.4</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png" onerror="handleImgErr(this,'004')" alt="ヒトカゲ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ヒトカゲ</div>
+                    </div>
+                    <div id="card-kanto_7" class="poke-card" data-key="kanto_7" data-name="ゼニガメ" data-id="7" data-dex="007" data-page="1" data-row="0" data-col="2" onclick="togglePokemon('kanto_7')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.7</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png" onerror="handleImgErr(this,'007')" alt="ゼニガメ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ゼニガメ</div>
+                    </div>
+                    <div id="card-kanto_10" class="poke-card" data-key="kanto_10" data-name="キャタピー" data-id="10" data-dex="010" data-page="1" data-row="0" data-col="3" onclick="togglePokemon('kanto_10')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.10</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10.png" onerror="handleImgErr(this,'010')" alt="キャタピー"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">キャタピー</div>
+                    </div>
+                    <div id="card-kanto_25" class="poke-card" data-key="kanto_25" data-name="ピカチュウ" data-id="25" data-dex="025" data-page="1" data-row="0" data-col="4" onclick="togglePokemon('kanto_25')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.25</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png" onerror="handleImgErr(this,'025')" alt="ピカチュウ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ピカチュウ</div>
+                    </div>
+                    <div id="card-kanto_58" class="poke-card" data-key="kanto_58" data-name="ガーディ" data-id="58" data-dex="058" data-page="1" data-row="1" data-col="0" onclick="togglePokemon('kanto_58')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.58</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/58.png" onerror="handleImgErr(this,'058')" alt="ガーディ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ガーディ</div>
+                    </div>
+                    <div id="card-kanto_63" class="poke-card" data-key="kanto_63" data-name="ケーシィ" data-id="63" data-dex="063" data-page="1" data-row="1" data-col="1" onclick="togglePokemon('kanto_63')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.63</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/63.png" onerror="handleImgErr(this,'063')" alt="ケーシィ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ケーシィ</div>
+                    </div>
+                    <div id="card-kanto_66" class="poke-card" data-key="kanto_66" data-name="ワンリキー" data-id="66" data-dex="066" data-page="1" data-row="1" data-col="2" onclick="togglePokemon('kanto_66')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.66</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/66.png" onerror="handleImgErr(this,'066')" alt="ワンリキー"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ワンリキー</div>
+                    </div>
+                    <div id="card-kanto_92" class="poke-card" data-key="kanto_92" data-name="ゴース" data-id="92" data-dex="092" data-page="1" data-row="1" data-col="3" onclick="togglePokemon('kanto_92')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.92</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/92.png" onerror="handleImgErr(this,'092')" alt="ゴース"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ゴース</div>
+                    </div>
+                    <div id="card-kanto_98" class="poke-card" data-key="kanto_98" data-name="クラブ" data-id="98" data-dex="098" data-page="1" data-row="1" data-col="4" onclick="togglePokemon('kanto_98')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.98</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/98.png" onerror="handleImgErr(this,'098')" alt="クラブ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">クラブ</div>
+                    </div>
+                    <div id="card-kanto_106" class="poke-card" data-key="kanto_106" data-name="サワムラー" data-id="106" data-dex="106" data-page="1" data-row="2" data-col="0" onclick="togglePokemon('kanto_106')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.106</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/106.png" onerror="handleImgErr(this,'106')" alt="サワムラー"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">サワムラー</div>
+                    </div>
+                    <div id="card-kanto_107" class="poke-card" data-key="kanto_107" data-name="エビワラー" data-id="107" data-dex="107" data-page="1" data-row="2" data-col="1" onclick="togglePokemon('kanto_107')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.107</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/107.png" onerror="handleImgErr(this,'107')" alt="エビワラー"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">エビワラー</div>
+                    </div>
+                    <div id="card-kanto_111" class="poke-card" data-key="kanto_111" data-name="サイホーン" data-id="111" data-dex="111" data-page="1" data-row="2" data-col="2" onclick="togglePokemon('kanto_111')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.111</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/111.png" onerror="handleImgErr(this,'111')" alt="サイホーン"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">サイホーン</div>
+                    </div>
+                    <div id="card-kanto_113" class="poke-card" data-key="kanto_113" data-name="ラッキー" data-id="113" data-dex="113" data-page="1" data-row="2" data-col="3" onclick="togglePokemon('kanto_113')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.113</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/113.png" onerror="handleImgErr(this,'113')" alt="ラッキー"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ラッキー</div>
+                    </div>
+                    <div id="card-kanto_125" class="poke-card" data-key="kanto_125" data-name="エレブー" data-id="125" data-dex="125" data-page="1" data-row="2" data-col="4" onclick="togglePokemon('kanto_125')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.125</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/125.png" onerror="handleImgErr(this,'125')" alt="エレブー"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">エレブー</div>
+                    </div>
+                    <div id="card-kanto_126" class="poke-card" data-key="kanto_126" data-name="ブーバー" data-id="126" data-dex="126" data-page="1" data-row="3" data-col="0" onclick="togglePokemon('kanto_126')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.126</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/126.png" onerror="handleImgErr(this,'126')" alt="ブーバー"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ブーバー</div>
+                    </div>
+                    <div id="card-kanto_129" class="poke-card" data-key="kanto_129" data-name="コイキング" data-id="129" data-dex="129" data-page="1" data-row="3" data-col="1" onclick="togglePokemon('kanto_129')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.129</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png" onerror="handleImgErr(this,'129')" alt="コイキング"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">コイキング</div>
+                    </div>
+                    <div id="card-kanto_133" class="poke-card" data-key="kanto_133" data-name="イーブイ" data-id="133" data-dex="133" data-page="1" data-row="3" data-col="2" onclick="togglePokemon('kanto_133')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.133</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/133.png" onerror="handleImgErr(this,'133')" alt="イーブイ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">イーブイ</div>
+                    </div>
+                    <div id="card-kanto_138" class="poke-card" data-key="kanto_138" data-name="オムナイト" data-id="138" data-dex="138" data-page="1" data-row="3" data-col="3" onclick="togglePokemon('kanto_138')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.138</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/138.png" onerror="handleImgErr(this,'138')" alt="オムナイト"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">オムナイト</div>
+                    </div>
+                    <div id="card-kanto_140" class="poke-card" data-key="kanto_140" data-name="カブト" data-id="140" data-dex="140" data-page="1" data-row="3" data-col="4" onclick="togglePokemon('kanto_140')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.140</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/140.png" onerror="handleImgErr(this,'140')" alt="カブト"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">カブト</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. ジョウト (4) -->
+            <section id="section-johto" class="region-section" data-page="1" data-region="johto">
+                <div class="region-header">
+                    <div class="region-title-pill">
+                        <span>ジョウト (4)</span>
+                        <span id="region-subcount-johto" class="region-subcount">0/4</span>
+                    </div>
+                    <button type="button" id="region-toggle-johto" class="region-toggle-btn" onclick="toggleRegionAll('johto')">地方一括チェック</button>
+                </div>
+                <div class="pokemon-grid">
+                    <div id="card-johto_163" class="poke-card" data-key="johto_163" data-name="ホーホー" data-id="163" data-dex="163" data-page="1" data-row="4" data-col="0" onclick="togglePokemon('johto_163')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.163</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/163.png" onerror="handleImgErr(this,'163')" alt="ホーホー"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ホーホー</div>
+                    </div>
+                    <div id="card-johto_213" class="poke-card" data-key="johto_213" data-name="ツボツボ" data-id="213" data-dex="213" data-page="1" data-row="4" data-col="1" onclick="togglePokemon('johto_213')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.213</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/213.png" onerror="handleImgErr(this,'213')" alt="ツボツボ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ツボツボ</div>
+                    </div>
+                    <div id="card-johto_215" class="poke-card" data-key="johto_215" data-name="ニューラ" data-id="215" data-dex="215" data-page="1" data-row="4" data-col="2" onclick="togglePokemon('johto_215')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.215</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/215.png" onerror="handleImgErr(this,'215')" alt="ニューラ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ニューラ</div>
+                    </div>
+                    <div id="card-johto_237" class="poke-card" data-key="johto_237" data-name="カポエラー" data-id="237" data-dex="237" data-page="1" data-row="4" data-col="3" onclick="togglePokemon('johto_237')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.237</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/237.png" onerror="handleImgErr(this,'237')" alt="カポエラー"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">カポエラー</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. ホウエン (7) -->
+            <section id="section-hoenn" class="region-section" data-page="1" data-region="hoenn">
+                <div class="region-header">
+                    <div class="region-title-pill">
+                        <span>ホウエン (7)</span>
+                        <span id="region-subcount-hoenn" class="region-subcount">0/7</span>
+                    </div>
+                    <button type="button" id="region-toggle-hoenn" class="region-toggle-btn" onclick="toggleRegionAll('hoenn')">地方一括チェック</button>
+                </div>
+                <div class="pokemon-grid">
+                    <div id="card-hoenn_280" class="poke-card" data-key="hoenn_280" data-name="ラルトス" data-id="280" data-dex="280" data-page="1" data-row="5" data-col="0" onclick="togglePokemon('hoenn_280')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.280</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/280.png" onerror="handleImgErr(this,'280')" alt="ラルトス"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ラルトス</div>
+                    </div>
+                    <div id="card-hoenn_302" class="poke-card" data-key="hoenn_302" data-name="ヤミラミ" data-id="302" data-dex="302" data-page="1" data-row="5" data-col="1" onclick="togglePokemon('hoenn_302')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.302</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/302.png" onerror="handleImgErr(this,'302')" alt="ヤミラミ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ヤミラミ</div>
+                    </div>
+                    <div id="card-hoenn_320" class="poke-card" data-key="hoenn_320" data-name="ホエルコ" data-id="320" data-dex="320" data-page="1" data-row="5" data-col="2" onclick="togglePokemon('hoenn_320')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.320</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/320.png" onerror="handleImgErr(this,'320')" alt="ホエルコ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ホエルコ</div>
+                    </div>
+                    <div id="card-hoenn_328" class="poke-card" data-key="hoenn_328" data-name="ナックラー" data-id="328" data-dex="328" data-page="1" data-row="5" data-col="3" onclick="togglePokemon('hoenn_328')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.328</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/328.png" onerror="handleImgErr(this,'328')" alt="ナックラー"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ナックラー</div>
+                    </div>
+                    <div id="card-hoenn_349" class="poke-card" data-key="hoenn_349" data-name="ヒンバス" data-id="349" data-dex="349" data-page="1" data-row="5" data-col="4" onclick="togglePokemon('hoenn_349')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.349</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/349.png" onerror="handleImgErr(this,'349')" alt="ヒンバス"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ヒンバス</div>
+                    </div>
+                    <div id="card-hoenn_363" class="poke-card" data-key="hoenn_363" data-name="タマザラシ" data-id="363" data-dex="363" data-page="1" data-row="6" data-col="0" onclick="togglePokemon('hoenn_363')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.363</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/363.png" onerror="handleImgErr(this,'363')" alt="タマザラシ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">タマザラシ</div>
+                    </div>
+                    <div id="card-hoenn_374" class="poke-card" data-key="hoenn_374" data-name="ダンバル" data-id="374" data-dex="374" data-page="1" data-row="6" data-col="1" onclick="togglePokemon('hoenn_374')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.374</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/374.png" onerror="handleImgErr(this,'374')" alt="ダンバル"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ダンバル</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. シンオウ (1) -->
+            <section id="section-sinnoh" class="region-section" data-page="1" data-region="sinnoh">
+                <div class="region-header">
+                    <div class="region-title-pill">
+                        <span>シンオウ (1)</span>
+                        <span id="region-subcount-sinnoh" class="region-subcount">0/1</span>
+                    </div>
+                    <button type="button" id="region-toggle-sinnoh" class="region-toggle-btn" onclick="toggleRegionAll('sinnoh')">地方一括チェック</button>
+                </div>
+                <div class="pokemon-grid">
+                    <div id="card-sinnoh_415" class="poke-card" data-key="sinnoh_415" data-name="ミツハニー" data-id="415" data-dex="415" data-page="1" data-row="7" data-col="0" onclick="togglePokemon('sinnoh_415')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.415</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/415.png" onerror="handleImgErr(this,'415')" alt="ミツハニー"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ミツハニー</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. イッシュ (10) -->
+            <section id="section-unova" class="region-section" data-page="2" data-region="unova">
+                <div class="region-header">
+                    <div class="region-title-pill">
+                        <span>イッシュ (10)</span>
+                        <span id="region-subcount-unova" class="region-subcount">0/10</span>
+                    </div>
+                    <button type="button" id="region-toggle-unova" class="region-toggle-btn" onclick="toggleRegionAll('unova')">地方一括チェック</button>
+                </div>
+                <div class="pokemon-grid">
+                    <div id="card-unova_519" class="poke-card" data-key="unova_519" data-name="マメパト" data-id="519" data-dex="519" data-page="2" data-row="0" data-col="0" onclick="togglePokemon('unova_519')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.519</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/519.png" onerror="handleImgErr(this,'519')" alt="マメパト"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">マメパト</div>
+                    </div>
+                    <div id="card-unova_524" class="poke-card" data-key="unova_524" data-name="ダンゴロ" data-id="524" data-dex="524" data-page="2" data-row="0" data-col="1" onclick="togglePokemon('unova_524')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.524</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/524.png" onerror="handleImgErr(this,'524')" alt="ダンゴロ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ダンゴロ</div>
+                    </div>
+                    <div id="card-unova_527" class="poke-card" data-key="unova_527" data-name="コロモリ" data-id="527" data-dex="527" data-page="2" data-row="0" data-col="2" onclick="togglePokemon('unova_527')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.527</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/527.png" onerror="handleImgErr(this,'527')" alt="コロモリ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">コロモリ</div>
+                    </div>
+                    <div id="card-unova_529" class="poke-card" data-key="unova_529" data-name="モグリュー" data-id="529" data-dex="529" data-page="2" data-row="0" data-col="3" onclick="togglePokemon('unova_529')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.529</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/529.png" onerror="handleImgErr(this,'529')" alt="モグリュー"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">モグリュー</div>
+                    </div>
+                    <div id="card-unova_530" class="poke-card" data-key="unova_530" data-name="ドリュウズ" data-id="530" data-dex="530" data-page="2" data-row="0" data-col="4" onclick="togglePokemon('unova_530')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.530</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/530.png" onerror="handleImgErr(this,'530')" alt="ドリュウズ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ドリュウズ</div>
+                    </div>
+                    <div id="card-unova_546" class="poke-card" data-key="unova_546" data-name="モンメン" data-id="546" data-dex="546" data-page="2" data-row="1" data-col="0" onclick="togglePokemon('unova_546')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.546</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/546.png" onerror="handleImgErr(this,'546')" alt="モンメン"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">モンメン</div>
+                    </div>
+                    <div id="card-unova_554" class="poke-card" data-key="unova_554" data-name="ダルマッカ" data-id="554" data-dex="554" data-page="2" data-row="1" data-col="1" onclick="togglePokemon('unova_554')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.554</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/554.png" onerror="handleImgErr(this,'554')" alt="ダルマッカ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ダルマッカ</div>
+                    </div>
+                    <div id="card-unova_568" class="poke-card" data-key="unova_568" data-name="ヤブクロン" data-id="568" data-dex="568" data-page="2" data-row="1" data-col="2" onclick="togglePokemon('unova_568')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.568</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/568.png" onerror="handleImgErr(this,'568')" alt="ヤブクロン"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ヤブクロン</div>
+                    </div>
+                    <div id="card-unova_615" class="poke-card" data-key="unova_615" data-name="フリージオ" data-id="615" data-dex="615" data-page="2" data-row="1" data-col="3" onclick="togglePokemon('unova_615')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.615</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/615.png" onerror="handleImgErr(this,'615')" alt="フリージオ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">フリージオ</div>
+                    </div>
+                    <div id="card-unova_633" class="poke-card" data-key="unova_633" data-name="モノズ" data-id="633" data-dex="633" data-page="2" data-row="1" data-col="4" onclick="togglePokemon('unova_633')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.633</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/633.png" onerror="handleImgErr(this,'633')" alt="モノズ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">モノズ</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. カロス (1) -->
+            <section id="section-kalos" class="region-section" data-page="2" data-region="kalos">
+                <div class="region-header">
+                    <div class="region-title-pill">
+                        <span>カロス (1)</span>
+                        <span id="region-subcount-kalos" class="region-subcount">0/1</span>
+                    </div>
+                    <button type="button" id="region-toggle-kalos" class="region-toggle-btn" onclick="toggleRegionAll('kalos')">地方一括チェック</button>
+                </div>
+                <div class="pokemon-grid">
+                    <div id="card-kalos_686" class="poke-card" data-key="kalos_686" data-name="マーイーカ" data-id="686" data-dex="686" data-page="2" data-row="2" data-col="0" onclick="togglePokemon('kalos_686')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.686</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/686.png" onerror="handleImgErr(this,'686')" alt="マーイーカ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">マーイーカ</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. アローラ (3) -->
+            <section id="section-alola" class="region-section" data-page="2" data-region="alola">
+                <div class="region-header">
+                    <div class="region-title-pill">
+                        <span>アローラ (3)</span>
+                        <span id="region-subcount-alola" class="region-subcount">0/3</span>
+                    </div>
+                    <button type="button" id="region-toggle-alola" class="region-toggle-btn" onclick="toggleRegionAll('alola')">地方一括チェック</button>
+                </div>
+                <div class="pokemon-grid">
+                    <div id="card-alola_761" class="poke-card" data-key="alola_761" data-name="アマカジ" data-id="761" data-dex="761" data-page="2" data-row="3" data-col="0" onclick="togglePokemon('alola_761')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.761</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/761.png" onerror="handleImgErr(this,'761')" alt="アマカジ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">アマカジ</div>
+                    </div>
+                    <div id="card-alola_766" class="poke-card" data-key="alola_766" data-name="ナゲツケサル" data-id="766" data-dex="766" data-page="2" data-row="3" data-col="1" onclick="togglePokemon('alola_766')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.766</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/766.png" onerror="handleImgErr(this,'766')" alt="ナゲツケサル"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ナゲツケサル</div>
+                    </div>
+                    <div id="card-alola_780" class="poke-card" data-key="alola_780" data-name="ジジーロン" data-id="780" data-dex="780" data-page="2" data-row="3" data-col="2" onclick="togglePokemon('alola_780')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.780</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/780.png" onerror="handleImgErr(this,'780')" alt="ジジーロン"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ジジーロン</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 8. ガラル (12) -->
+            <section id="section-galar" class="region-section" data-page="2" data-region="galar">
+                <div class="region-header">
+                    <div class="region-title-pill">
+                        <span>ガラル (12)</span>
+                        <span id="region-subcount-galar" class="region-subcount">0/12</span>
+                    </div>
+                    <button type="button" id="region-toggle-galar" class="region-toggle-btn" onclick="toggleRegionAll('galar')">地方一括チェック</button>
+                </div>
+                <div class="pokemon-grid">
+                    <div id="card-galar_810" class="poke-card" data-key="galar_810" data-name="サルノリ" data-id="810" data-dex="810" data-page="2" data-row="4" data-col="0" onclick="togglePokemon('galar_810')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.810</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/810.png" onerror="handleImgErr(this,'810')" alt="サルノリ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">サルノリ</div>
+                    </div>
+                    <div id="card-galar_813" class="poke-card" data-key="galar_813" data-name="ヒバニー" data-id="813" data-dex="813" data-page="2" data-row="4" data-col="1" onclick="togglePokemon('galar_813')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.813</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/813.png" onerror="handleImgErr(this,'813')" alt="ヒバニー"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ヒバニー</div>
+                    </div>
+                    <div id="card-galar_816" class="poke-card" data-key="galar_816" data-name="メッソン" data-id="816" data-dex="816" data-page="2" data-row="4" data-col="2" onclick="togglePokemon('galar_816')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.816</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/816.png" onerror="handleImgErr(this,'816')" alt="メッソン"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">メッソン</div>
+                    </div>
+                    <div id="card-galar_819" class="poke-card" data-key="galar_819" data-name="ホシガリス" data-id="819" data-dex="819" data-page="2" data-row="4" data-col="3" onclick="togglePokemon('galar_819')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.819</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/819.png" onerror="handleImgErr(this,'819')" alt="ホシガリス"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ホシガリス</div>
+                    </div>
+                    <div id="card-galar_821" class="poke-card" data-key="galar_821" data-name="ココガラ" data-id="821" data-dex="821" data-page="2" data-row="4" data-col="4" onclick="togglePokemon('galar_821')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.821</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/821.png" onerror="handleImgErr(this,'821')" alt="ココガラ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ココガラ</div>
+                    </div>
+                    <div id="card-galar_831" class="poke-card" data-key="galar_831" data-name="ウールー" data-id="831" data-dex="831" data-page="2" data-row="5" data-col="0" onclick="togglePokemon('galar_831')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.831</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/831.png" onerror="handleImgErr(this,'831')" alt="ウールー"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ウールー</div>
+                    </div>
+                    <div id="card-galar_849" class="poke-card" data-key="galar_849" data-name="ストリンダー(ハイ)" data-id="849" data-dex="849" data-page="2" data-row="5" data-col="1" onclick="togglePokemon('galar_849')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.849</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/849.png" onerror="handleImgErr(this,'849')" alt="ストリンダー(ハイ)"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar long-name">ストリンダー(ハイ)</div>
+                    </div>
+                    <div id="card-galar_10184" class="poke-card" data-key="galar_10184" data-name="ストリンダー(ロー)" data-id="10184" data-dex="849" data-page="2" data-row="5" data-col="2" onclick="togglePokemon('galar_10184')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.849</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10184.png" onerror="handleImgErr(this,'849')" alt="ストリンダー(ロー)"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar long-name">ストリンダー(ロー)</div>
+                    </div>
+                    <div id="card-galar_850" class="poke-card" data-key="galar_850" data-name="ヤクデ" data-id="850" data-dex="850" data-page="2" data-row="5" data-col="3" onclick="togglePokemon('galar_850')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.850</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/850.png" onerror="handleImgErr(this,'850')" alt="ヤクデ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ヤクデ</div>
+                    </div>
+                    <div id="card-galar_856" class="poke-card" data-key="galar_856" data-name="ミブリム" data-id="856" data-dex="856" data-page="2" data-row="5" data-col="4" onclick="togglePokemon('galar_856')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.856</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/856.png" onerror="handleImgErr(this,'856')" alt="ミブリム"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ミブリム</div>
+                    </div>
+                    <div id="card-galar_870" class="poke-card" data-key="galar_870" data-name="タイレーツ" data-id="870" data-dex="870" data-page="2" data-row="6" data-col="0" onclick="togglePokemon('galar_870')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.870</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/870.png" onerror="handleImgErr(this,'870')" alt="タイレーツ"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">タイレーツ</div>
+                    </div>
+                    <div id="card-galar_884" class="poke-card" data-key="galar_884" data-name="ジュラルドン" data-id="884" data-dex="884" data-page="2" data-row="6" data-col="1" onclick="togglePokemon('galar_884')">
+                        <div class="dmax-art-box"><span class="check-indicator">✓</span><div class="fallback-badge"><span class="fallback-dex">No.884</span></div><img class="poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/884.png" onerror="handleImgErr(this,'884')" alt="ジュラルドン"><span class="get-ribbon">GET済</span></div>
+                        <div class="poke-name-bar">ジュラルドン</div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <div id="empty-state" class="empty-state">
+            <p style="font-size:14px;font-weight:800;color:#334155;margin-bottom:6px;">条件に一致するポケモンがいません</p>
+            <button type="button" style="background:#111c35;color:#fff;font-size:12px;font-weight:800;padding:6px 14px;border-radius:8px;" onclick="resetFilters()">フィルターをすべて解除</button>
+        </div>
+    </main>
+
+    <!-- テキスト出力モーダル -->
+    <div id="summary-modal" class="modal-backdrop" onclick="handleBackdropClick(event, 'summary-modal')">
+        <div class="modal-panel">
+            <div class="modal-header">
+                <h3 class="modal-title">📋 所持・未所持リスト出力</h3>
+                <button type="button" class="modal-close" onclick="closeModal('summary-modal')">×</button>
+            </div>
+            <div class="segmented-group" style="align-self: flex-start;">
+                <button type="button" id="export-mode-missing" class="seg-btn active-dark" onclick="setExportMode('missing')">未所持リスト</button>
+                <button type="button" id="export-mode-owned" class="seg-btn" onclick="setExportMode('owned')">所持済リスト</button>
+                <button type="button" id="export-mode-all" class="seg-btn" onclick="setExportMode('all')">全状況まとめ</button>
+            </div>
+            <textarea id="summary-text" class="summary-textarea" readonly></textarea>
+            <div class="modal-btn-row">
+                <button type="button" class="modal-btn modal-btn-primary" onclick="copySummaryText()">テキストをコピー</button>
+                <button type="button" class="modal-btn modal-btn-secondary" onclick="closeModal('summary-modal')">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 一括管理・画像設定モーダル -->
+    <div id="manage-modal" class="modal-backdrop" onclick="handleBackdropClick(event, 'manage-modal')">
+        <div class="modal-panel">
+            <div class="modal-header">
+                <h3 class="modal-title">⚙️ 一括チェック・画像設定</h3>
+                <button type="button" class="modal-close" onclick="closeModal('manage-modal')">×</button>
+            </div>
+            <p style="font-size: 12px; color: #475569;">
+                元画像2枚（1/2・2/2）を選択すると、全58枠を自動切り抜き＆超軽量圧縮して差し替えます。
+            </p>
+            <div class="modal-btn-row">
+                <button type="button" class="modal-btn modal-btn-primary" onclick="closeModal('manage-modal'); triggerPhotoUpload();">📷 写真2枚(1/2・2/2)を取り込む</button>
+                <button type="button" class="modal-btn modal-btn-secondary" onclick="swapCroppedPages()">🔄 1枚目/2枚目を入れ替え</button>
+            </div>
+            <div class="modal-btn-row">
+                <button type="button" class="modal-btn modal-btn-emerald" onclick="markAllPokemon(true)">全58枠を所持済にする</button>
+                <button type="button" class="modal-btn modal-btn-danger" onclick="markAllPokemon(false)">全58枠を未所持にリセット</button>
+            </div>
+            <div class="modal-btn-row">
+                <button type="button" class="modal-btn modal-btn-secondary" onclick="closeModal('manage-modal')">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">コピーしました</div>
+
+    <script>
+        var STORAGE_KEY = 'pogo_giant_footprint_bg_58_v1';
+        var CROPPED_ICONS_STORAGE_KEY = 'pogo_giant_footprint_cropped_icons_v1';
+        var IMG_MODE_STORAGE_KEY = 'pogo_giant_footprint_img_mode_v2';
+
+        var ownedMap = {};
+        var croppedIconsMap = {};
+        var lastUploadedRawPages = {};
+        var currentPageFilter = 'all';
+        var currentStatusFilter = 'all';
+        var currentImageMode = 'fast';
+        var searchQuery = '';
+        var currentExportMode = 'missing';
+
+        // 画像読み込みエラー時に公式図鑑の軽量アイコンへ自動フォールバック
+        function handleImgErr(imgEl, paddedDex) {
+            var step = imgEl.getAttribute('data-err-step') || '0';
+            if (step === '0') {
+                imgEl.setAttribute('data-err-step', '1');
+                imgEl.className = 'poke-img smooth-art';
+                imgEl.src = 'https://assets.pokemon.com/assets/cms2/img/pokedex/detail/' + paddedDex + '.png';
+            } else if (step === '1') {
+                imgEl.setAttribute('data-err-step', '2');
+                imgEl.src = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + parseInt(paddedDex, 10) + '.png';
+            }
+        }
+
+        function safeGetStorage(key) {
+            try { return localStorage.getItem(key); } catch (e) { return null; }
+        }
+
+        function safeSetStorage(key, val) {
+            try { localStorage.setItem(key, val); } catch (e) {}
+        }
+
+        function initApp() {
+            try {
+                var rawOwned = safeGetStorage(STORAGE_KEY);
+                if (rawOwned) ownedMap = JSON.parse(rawOwned) || {};
+            } catch (e) { ownedMap = {}; }
+
+            try {
+                var rawIcons = safeGetStorage(CROPPED_ICONS_STORAGE_KEY);
+                if (rawIcons) croppedIconsMap = JSON.parse(rawIcons) || {};
+            } catch (e) { croppedIconsMap = {}; }
+
+            var savedMode = safeGetStorage(IMG_MODE_STORAGE_KEY);
+            if (savedMode === 'fast' || savedMode === '3d') {
+                currentImageMode = savedMode;
+            }
+
+            applyAllStatesToDOM();
+        }
+
+        // すでにHTML上にある58枚のカードに対して所持状態・フィルター・画像を反映
+        function applyAllStatesToDOM() {
+            var cards = document.querySelectorAll('.poke-card');
+            var normalizedQuery = hiraToKata(searchQuery.toLowerCase());
+            var visibleCount = 0;
+
+            for (var i = 0; i < cards.length; i++) {
+                var card = cards[i];
+                var key = card.getAttribute('data-key');
+                var name = card.getAttribute('data-name') || '';
+                var id = card.getAttribute('data-id');
+                var dex = card.getAttribute('data-dex');
+                var isOwned = !!ownedMap[key];
+
+                card.className = isOwned ? 'poke-card owned' : 'poke-card';
+
+                // 画像ソースの更新
+                var imgEl = card.querySelector('.poke-img');
+                var artBox = card.querySelector('.dmax-art-box');
+                if (imgEl && artBox) {
+                    if (croppedIconsMap[key]) {
+                        if (imgEl.src !== croppedIconsMap[key]) {
+                            imgEl.src = croppedIconsMap[key];
+                        }
+                        imgEl.className = 'poke-img cropped-photo';
+                        artBox.className = 'dmax-art-box has-cropped-photo';
+                    } else if (currentImageMode === '3d') {
+                        var target3d = 'https://assets.pokemon.com/assets/cms2/img/pokedex/detail/' + dex + '.png';
+                        if (imgEl.getAttribute('data-mode') !== '3d') {
+                            imgEl.setAttribute('data-mode', '3d');
+                            imgEl.className = 'poke-img smooth-art';
+                            imgEl.src = target3d;
+                        }
+                        artBox.className = 'dmax-art-box';
+                    } else {
+                        var targetFast = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + id + '.png';
+                        if (imgEl.getAttribute('data-mode') !== 'fast') {
+                            imgEl.setAttribute('data-mode', 'fast');
+                            imgEl.className = 'poke-img';
+                            imgEl.src = targetFast;
+                        }
+                        artBox.className = 'dmax-art-box';
+                    }
+                }
+
+                // フィルター判定
+                var showCard = true;
+                if (currentStatusFilter === 'missing' && isOwned) showCard = false;
+                if (currentStatusFilter === 'owned' && !isOwned) showCard = false;
+                if (normalizedQuery && hiraToKata(name.toLowerCase()).indexOf(normalizedQuery) === -1) {
+                    showCard = false;
+                }
+                card.style.display = showCard ? '' : 'none';
+            }
+
+            // 地方セクションごとの表示・カウント更新
+            var sections = document.querySelectorAll('.region-section');
+            for (var s = 0; s < sections.length; s++) {
+                var sec = sections[s];
+                var page = sec.getAttribute('data-page');
+                var regionId = sec.getAttribute('data-region');
+                var secCards = sec.querySelectorAll('.poke-card');
+                var regionTotal = secCards.length;
+                var regionOwned = 0;
+                var regionVisible = 0;
+
+                for (var c = 0; c < secCards.length; c++) {
+                    var cKey = secCards[c].getAttribute('data-key');
+                    if (ownedMap[cKey]) regionOwned++;
+                    if (secCards[c].style.display !== 'none') regionVisible++;
+                }
+
+                var pageMatch = (currentPageFilter === 'all' || currentPageFilter === page);
+                if (pageMatch && regionVisible > 0) {
+                    sec.style.display = '';
+                    visibleCount += regionVisible;
+                } else {
+                    sec.style.display = 'none';
+                }
+
+                var isComplete = (regionOwned === regionTotal);
+                var subEl = document.getElementById('region-subcount-' + regionId);
+                if (subEl) subEl.textContent = regionOwned + '/' + regionTotal;
+
+                var toggleBtn = document.getElementById('region-toggle-' + regionId);
+                if (toggleBtn) {
+                    toggleBtn.className = isComplete ? 'region-toggle-btn is-complete' : 'region-toggle-btn';
+                    toggleBtn.textContent = isComplete ? '地方解除' : '地方一括チェック';
+                }
+
+                var navChip = document.getElementById('nav-chip-' + regionId);
+                if (navChip) {
+                    navChip.style.display = pageMatch ? '' : 'none';
+                    navChip.className = isComplete ? 'region-chip complete' : 'region-chip';
+                    var chipCount = navChip.querySelector('.chip-count');
+                    if (chipCount) chipCount.textContent = regionOwned + '/' + regionTotal;
+                }
+            }
+
+            // 全体進捗更新
+            var totalOwned = Object.keys(ownedMap).length;
+            var pct = Math.round((totalOwned / 58) * 100);
+            document.getElementById('owned-count').textContent = totalOwned;
+            document.getElementById('progress-percent').textContent = '(' + pct + '%)';
+            document.getElementById('progress-bar').style.width = pct + '%';
+
+            var emptyEl = document.getElementById('empty-state');
+            if (emptyEl) {
+                emptyEl.className = (visibleCount === 0) ? 'empty-state visible' : 'empty-state';
+            }
+
+            var modeLabel = document.getElementById('header-mode-label');
+            if (modeLabel) {
+                modeLabel.textContent = (currentImageMode === '3d') ? '🔮高画質' : '⚡高速絵';
+            }
+
+            var photoCount = Object.keys(croppedIconsMap).length;
+            var photoBtn = document.getElementById('header-photo-btn');
+            var photoLabel = document.getElementById('header-photo-label');
+            if (photoBtn && photoLabel) {
+                if (photoCount >= 50) {
+                    photoBtn.className = 'action-btn btn-photo has-photos';
+                    photoLabel.textContent = '📷写真済';
+                } else if (photoCount > 0) {
+                    photoLabel.textContent = '📷写真(' + photoCount + ')';
+                } else {
+                    photoBtn.className = 'action-btn btn-photo';
+                    photoLabel.textContent = '📷スクショ取込';
+                }
+            }
+        }
+
+        function togglePokemon(key) {
+            if (ownedMap[key]) {
+                delete ownedMap[key];
+            } else {
+                ownedMap[key] = true;
+            }
+            safeSetStorage(STORAGE_KEY, JSON.stringify(ownedMap));
+            applyAllStatesToDOM();
+        }
+
+        function toggleRegionAll(regionId) {
+            var sec = document.getElementById('section-' + regionId);
+            if (!sec) return;
+            var cards = sec.querySelectorAll('.poke-card');
+            var allOwned = true;
+            for (var i = 0; i < cards.length; i++) {
+                if (!ownedMap[cards[i].getAttribute('data-key')]) {
+                    allOwned = false;
+                    break;
+                }
+            }
+            for (var j = 0; j < cards.length; j++) {
+                var k = cards[j].getAttribute('data-key');
+                if (allOwned) {
+                    delete ownedMap[k];
+                } else {
+                    ownedMap[k] = true;
+                }
+            }
+            safeSetStorage(STORAGE_KEY, JSON.stringify(ownedMap));
+            applyAllStatesToDOM();
+            showToast(allOwned ? '地方のチェックを解除しました' : '地方を一括チェックしました');
+        }
+
+        function cycleImageMode() {
+            currentImageMode = (currentImageMode === 'fast') ? '3d' : 'fast';
+            safeSetStorage(IMG_MODE_STORAGE_KEY, currentImageMode);
+            applyAllStatesToDOM();
+            showToast(currentImageMode === '3d' ? '🔮 公式イラスト表示に切り替えました' : '⚡ 超軽量ドット絵に切り替えました');
+        }
+
+        function setPageFilter(page) {
+            currentPageFilter = page;
+            var ids = ['all', '1', '2'];
+            for (var i = 0; i < ids.length; i++) {
+                var btn = document.getElementById('page-btn-' + ids[i]);
+                if (btn) btn.className = (ids[i] === page) ? 'seg-btn active-dark' : 'seg-btn';
+            }
+            applyAllStatesToDOM();
+        }
+
+        function setStatusFilter(status) {
+            currentStatusFilter = status;
+            var ids = ['all', 'missing', 'owned'];
+            for (var i = 0; i < ids.length; i++) {
+                var btn = document.getElementById('status-btn-' + ids[i]);
+                if (btn) btn.className = (ids[i] === status) ? 'seg-btn active-light' : 'seg-btn';
+            }
+            applyAllStatesToDOM();
+        }
+
+        function hiraToKata(str) {
+            return str.replace(/[\u3041-\u3096]/g, function(m) {
+                return String.fromCharCode(m.charCodeAt(0) + 0x60);
+            });
+        }
+
+        function handleSearch(val) {
+            searchQuery = (val || '').trim();
+            var clearBtn = document.getElementById('clear-search-btn');
+            if (clearBtn) {
+                clearBtn.className = searchQuery.length > 0 ? 'search-clear visible' : 'search-clear';
+            }
+            applyAllStatesToDOM();
+        }
+
+        function clearSearch() {
+            var input = document.getElementById('search-input');
+            if (input) input.value = '';
+            handleSearch('');
+        }
+
+        function resetFilters() {
+            setPageFilter('all');
+            setStatusFilter('all');
+            clearSearch();
+        }
+
+        function scrollToRegion(regionId) {
+            var el = document.getElementById('section-' + regionId);
+            if (el) {
+                var rect = el.getBoundingClientRect();
+                var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                window.scrollTo({ top: rect.top + scrollTop - 68, behavior: 'smooth' });
+            }
+        }
+
+        // ==========================================
+        // スクショ2枚から58枠を自動切り抜き＆超軽量保存
+        // ==========================================
+        function triggerPhotoUpload() {
+            var input = document.getElementById('photo-file-input');
+            if (input) {
+                input.value = '';
+                input.click();
+            }
+        }
+
+        function handlePhotoFilesSelected(fileList) {
+            if (!fileList || fileList.length === 0) return;
+            var files = Array.prototype.slice.call(fileList);
+            showToast('画像を解析・超軽量切り抜き中...');
+
+            var loadedImages = [];
+            var processed = 0;
+
+            files.forEach(function(file, idx) {
+                var reader = new FileReader();
+                reader.onload = function(ev) {
+                    var img = new Image();
+                    img.onload = function() {
+                        loadedImages.push({ img: img, index: idx });
+                        processed++;
+                        if (processed === files.length) {
+                            processLoadedInfographicImages(loadedImages);
+                        }
+                    };
+                    img.onerror = function() {
+                        processed++;
+                        if (processed === files.length && loadedImages.length > 0) {
+                            processLoadedInfographicImages(loadedImages);
+                        }
+                    };
+                    img.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function getPage1LikelihoodScore(img) {
+            var cvs = document.createElement('canvas');
+            var w = 150, h = 266;
+            cvs.width = w; cvs.height = h;
+            var ctx = cvs.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            var data = ctx.getImageData(0, 0, w, h).data;
+            var darkPixels = 0;
+            for (var y = Math.floor(h * 0.38); y < Math.floor(h * 0.55); y += 2) {
+                for (var x = Math.floor(w * 0.45); x < Math.floor(w * 0.95); x += 2) {
+                    var idx = (y * w + x) * 4;
+                    if (data[idx] < 180 && data[idx + 1] < 160) darkPixels++;
+                }
+            }
+            return darkPixels;
+        }
+
+        function processLoadedInfographicImages(items) {
+            if (items.length === 1) {
+                var score = getPage1LikelihoodScore(items[0].img);
+                var pageStr = score > 120 ? '1' : '2';
+                lastUploadedRawPages[pageStr] = items[0].img;
+                cropPagePokemonFromImage(items[0].img, pageStr);
+            } else {
+                var s0 = getPage1LikelihoodScore(items[0].img);
+                var s1 = getPage1LikelihoodScore(items[1].img);
+                if (s0 >= s1) {
+                    lastUploadedRawPages['1'] = items[0].img;
+                    lastUploadedRawPages['2'] = items[1].img;
+                } else {
+                    lastUploadedRawPages['1'] = items[1].img;
+                    lastUploadedRawPages['2'] = items[0].img;
+                }
+                cropPagePokemonFromImage(lastUploadedRawPages['1'], '1');
+                cropPagePokemonFromImage(lastUploadedRawPages['2'], '2');
+            }
+            safeSetStorage(CROPPED_ICONS_STORAGE_KEY, JSON.stringify(croppedIconsMap));
+            applyAllStatesToDOM();
+            showToast('✨ 写真からアイコンを切り抜いて反映しました！');
+        }
+
+        function swapCroppedPages() {
+            if (lastUploadedRawPages['1'] && lastUploadedRawPages['2']) {
+                var tmp = lastUploadedRawPages['1'];
+                lastUploadedRawPages['1'] = lastUploadedRawPages['2'];
+                lastUploadedRawPages['2'] = tmp;
+                cropPagePokemonFromImage(lastUploadedRawPages['1'], '1');
+                cropPagePokemonFromImage(lastUploadedRawPages['2'], '2');
+                safeSetStorage(CROPPED_ICONS_STORAGE_KEY, JSON.stringify(croppedIconsMap));
+                applyAllStatesToDOM();
+                closeModal('manage-modal');
+                showToast('🔄 1枚目と2枚目を入れ替えました');
+            } else {
+                showToast('先に2枚の写真を読み込んでください');
+            }
+        }
+
+        function cropPagePokemonFromImage(img, pageStr) {
+            var W = img.naturalWidth || img.width;
+            var H = img.naturalHeight || img.height;
+            var yPcts = (pageStr === '1')
+                ? [0.0802, 0.1829, 0.2856, 0.3883, 0.5135, 0.6387, 0.7414, 0.8666]
+                : [0.0885, 0.2024, 0.3418, 0.4813, 0.6207, 0.7346, 0.8486];
+            var hPct = (pageStr === '1') ? 0.0990 : 0.1094;
+            var xPcts = [0.0120, 0.2080, 0.4040, 0.6000, 0.7960];
+            var wPct = 0.1800;
+
+            var outSize = 84;
+            var outCvs = document.createElement('canvas');
+            outCvs.width = outSize;
+            outCvs.height = outSize;
+            var outCtx = outCvs.getContext('2d');
+
+            var cards = document.querySelectorAll('.poke-card[data-page="' + pageStr + '"]');
+            for (var i = 0; i < cards.length; i++) {
+                var c = cards[i];
+                var key = c.getAttribute('data-key');
+                var r = parseInt(c.getAttribute('data-row'), 10);
+                var col = parseInt(c.getAttribute('data-col'), 10);
+                var sx = Math.round(xPcts[col] * W);
+                var sw = Math.round(wPct * W);
+                var sy = Math.round(yPcts[r] * H);
+                var sh = Math.min(sw, Math.round(hPct * H * 0.79));
+
+                outCtx.clearRect(0, 0, outSize, outSize);
+                outCtx.drawImage(img, sx, sy, sw, sh, 0, 0, outSize, outSize);
+                var dataUrl = outCvs.toDataURL('image/webp', 0.74);
+                if (dataUrl.indexOf('data:image/webp') !== 0) {
+                    dataUrl = outCvs.toDataURL('image/jpeg', 0.75);
+                }
+                croppedIconsMap[key] = dataUrl;
+            }
+        }
+
+        // ==========================================
+        // モーダル & テキスト出力
+        // ==========================================
+        function openSummaryModal() {
+            updateSummaryTextarea();
+            document.getElementById('summary-modal').className = 'modal-backdrop open';
+        }
+
+        function openManageModal() {
+            document.getElementById('manage-modal').className = 'modal-backdrop open';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).className = 'modal-backdrop';
+        }
+
+        function handleBackdropClick(event, id) {
+            if (event.target.id === id) closeModal(id);
+        }
+
+        function setExportMode(mode) {
+            currentExportMode = mode;
+            var modes = ['missing', 'owned', 'all'];
+            for (var i = 0; i < modes.length; i++) {
+                var btn = document.getElementById('export-mode-' + modes[i]);
+                if (btn) btn.className = (modes[i] === mode) ? 'seg-btn active-dark' : 'seg-btn';
+            }
+            updateSummaryTextarea();
+        }
+
+        function updateSummaryTextarea() {
+            var totalOwned = Object.keys(ownedMap).length;
+            var pct = Math.round((totalOwned / 58) * 100);
+            var lines = [
+                '【大きな足跡 スペシャル背景 ダイマックス進捗】',
+                '所持状況: ' + totalOwned + ' / 58 (' + pct + '%)',
+                ''
+            ];
+
+            var sections = document.querySelectorAll('.region-section');
+            for (var s = 0; s < sections.length; s++) {
+                var sec = sections[s];
+                var titleText = sec.querySelector('.region-title-pill span').textContent.split(' ')[0];
+                var cards = sec.querySelectorAll('.poke-card');
+                var list = [];
+                var ownedInSec = 0;
+
+                for (var c = 0; c < cards.length; c++) {
+                    var k = cards[c].getAttribute('data-key');
+                    var nm = cards[c].getAttribute('data-name');
+                    var isOwn = !!ownedMap[k];
+                    if (isOwn) ownedInSec++;
+
+                    if (currentExportMode === 'missing' && !isOwn) list.push(nm);
+                    else if (currentExportMode === 'owned' && isOwn) list.push(nm);
+                    else if (currentExportMode === 'all') list.push((isOwn ? '✅' : '⬜') + nm);
+                }
+
+                if (currentExportMode === 'missing' && list.length > 0) {
+                    lines.push('■ ' + titleText + ' (残り' + list.length + ')');
+                    lines.push(list.join('、'));
+                    lines.push('');
+                } else if (currentExportMode === 'owned' && list.length > 0) {
+                    lines.push('■ ' + titleText + ' (' + ownedInSec + '/' + cards.length + ')');
+                    lines.push(list.join('、'));
+                    lines.push('');
+                } else if (currentExportMode === 'all') {
+                    lines.push('■ ' + titleText + ' (' + ownedInSec + '/' + cards.length + ')');
+                    lines.push(list.join(' '));
+                    lines.push('');
+                }
+            }
+
+            document.getElementById('summary-text').value = lines.join('\n').trim();
+        }
+
+        function copySummaryText() {
+            var textarea = document.getElementById('summary-text');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showToast('コピーしました！');
+            } catch (e) {
+                showToast('手動で選択してコピーしてください');
+            }
+        }
+
+        function markAllPokemon(isOwned) {
+            ownedMap = {};
+            if (isOwned) {
+                var cards = document.querySelectorAll('.poke-card');
+                for (var i = 0; i < cards.length; i++) {
+                    ownedMap[cards[i].getAttribute('data-key')] = true;
+                }
+            }
+            safeSetStorage(STORAGE_KEY, JSON.stringify(ownedMap));
+            applyAllStatesToDOM();
+            closeModal('manage-modal');
+            showToast(isOwned ? '全58枠を所持済にしました' : '全58枠をリセットしました');
+        }
+
+        var toastTimer = null;
+        function showToast(msg) {
+            var toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.className = 'toast show';
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(function() {
+                toast.className = 'toast';
+            }, 2200);
+        }
+
+        initApp();
+    </script>
+</body>
+</html>
